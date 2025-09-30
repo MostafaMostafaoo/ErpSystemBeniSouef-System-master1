@@ -1,5 +1,6 @@
 ﻿using ErpSystemBeniSouef.Core.Contract;
 using ErpSystemBeniSouef.Core.Contract.Invoice;
+using ErpSystemBeniSouef.Core.Contract.Invoice.IDamageInvoiceService;
 using ErpSystemBeniSouef.Core.Contract.Invoice.ReturnSupplir;
 using ErpSystemBeniSouef.ViewModel;
 using Microsoft.Extensions.DependencyInjection;
@@ -64,8 +65,14 @@ namespace ErpSystemBeniSouef.Views.Pages.InvoiceAndsupplierRegion.InvoicePages
 
         private void ruin_Click(object sender, RoutedEventArgs e)
         {
-            //var ruinPage = new InvoicePages.ruinPage();
-            //MainWindowViewModel.MainWindow.Frame.NavigationService.Navigate(ruinPage);
+
+          //  var supplierService = App.AppHost.Services.GetRequiredService<ISupplierService>();
+            var cashInvoiceService = App.AppHost.Services.GetRequiredService<IDamageInvoiceService>();
+
+            var Dashboard = new InvoicePages.DamageInvoic( cashInvoiceService);
+            MainWindowViewModel.MainWindow.Frame.NavigationService.Navigate(Dashboard);
+
+
         }
 
         private void BackBtn_Click(object sender, RoutedEventArgs e)

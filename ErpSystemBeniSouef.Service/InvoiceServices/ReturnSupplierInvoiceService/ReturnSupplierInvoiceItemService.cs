@@ -29,7 +29,9 @@ namespace ErpSystemBeniSouef.Service.InvoiceServices.ReturnSupplierInvoiceServic
             try
             {
                 invoice = await _unitOfWork.Repository<Invoice>()
-              .FindWithIncludesAsync(i => i.Id == dto.Id && i.invoiceType == InvoiceType.SupplierReturn, i => i.Supplier);
+     .FindWithIncludesAsync(i => i.Id == dto.Id && i.invoiceType == InvoiceType.SupplierReturn,
+                            i => i.Supplier, i => i.Items);
+
 
             }
             catch (Exception ex)
@@ -53,7 +55,7 @@ namespace ErpSystemBeniSouef.Service.InvoiceServices.ReturnSupplierInvoiceServic
                     InvoiceId = invoice.Id,
                     ProductId = product.Id,
                     ProductName = product.ProductName,
-                    ProductType = product.Category?.Name ?? "N/A",
+                    ProductType = itemDto.ProductTypeName ?? "N/A",
                     Quantity = itemDto.Quantity,
                     UnitPrice = itemDto.UnitPrice
                 };
@@ -76,14 +78,17 @@ namespace ErpSystemBeniSouef.Service.InvoiceServices.ReturnSupplierInvoiceServic
         public async Task<List<ReturnSupplierInvoiceItemDetailsDto>> GetInvoiceItemsByInvoiceId(int invoiceId)
         {
             var items = await _unitOfWork.Repository<InvoiceItem>()
-                .GetAllAsync(i => i.InvoiceId == invoiceId);
+            .GetAllAsync();
+            items = items.Where(i => i.InvoiceId == invoiceId).ToList();
 
             return items.Select(i => new ReturnSupplierInvoiceItemDetailsDto
             {
                 Id = i.Id,
                 InvoiceId = i.InvoiceId,
                 ProductName = i.ProductName,
+                ProductId = i.Id,
                 ProductType = i.ProductType,
+                ProductTypeName = i.ProductType,
                 Quantity = i.Quantity,
                 UnitPrice = i.UnitPrice,
                 Notes = i.Notes

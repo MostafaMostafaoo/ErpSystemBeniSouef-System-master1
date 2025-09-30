@@ -45,7 +45,7 @@ namespace ErpSystemBeniSouef.Views.Pages.InvoiceAndsupplierRegion.InvoicePages.I
         ObservableCollection<ProductDto> observProductsLisLim = new ObservableCollection<ProductDto>();
         ObservableCollection<ProductDto> observProductsListFiltered = new ObservableCollection<ProductDto>();
         ObservableCollection<ReturnSupplierInvoiceItemDetailsDto> observReturnInvoiceItemDtosListFiltered = new ObservableCollection<ReturnSupplierInvoiceItemDetailsDto>();
-        ObservableCollection<ReturnSupplierInvoiceItemDetailsDto> observCashInvoiceItemDtosList = new ObservableCollection<ReturnSupplierInvoiceItemDetailsDto>();
+        ObservableCollection<ReturnSupplierInvoiceItemDetailsDto> observReturnInvoiceItemDtosList = new ObservableCollection<ReturnSupplierInvoiceItemDetailsDto>();
 
         int invoiceIDFromInvoicePage;
         int counId = 0;
@@ -73,19 +73,20 @@ namespace ErpSystemBeniSouef.Views.Pages.InvoiceAndsupplierRegion.InvoicePages.I
                 cbProductType.SelectedIndex = 0;
 
                 cbProduct.ItemsSource = observProductsListFiltered;
-                cbProduct.SelectedIndex = 0;
+                if (observProductsListFiltered.Any())
+                    cbProduct.SelectedIndex = 0;
+
             };
         }
 
         #endregion
-
 
         #region load products to Grid Region
 
         private async Task Loadproducts()
         {
             observReturnInvoiceItemDtosListFiltered.Clear();
-            observCashInvoiceItemDtosList.Clear();
+            observReturnInvoiceItemDtosList.Clear();
             countDisplayNo = 0;
             IReadOnlyList<ProductDto> products = _productService.GetAll();
             foreach (var product in products)
@@ -96,25 +97,19 @@ namespace ErpSystemBeniSouef.Views.Pages.InvoiceAndsupplierRegion.InvoicePages.I
 
             categories = await _productService.GetAllCategoriesAsync();
 
-            try
-            {
-                var observCashInvoiceItemDtos = await _returnSupplierInvoiceService.GetInvoiceItemsByInvoiceId(invoiceIDFromInvoicePage);
+           var observCashInvoiceItemDtos = await _returnSupplierInvoiceService.GetInvoiceItemsByInvoiceId(invoiceIDFromInvoicePage);
                 foreach (var product in observCashInvoiceItemDtos)
                 {
                     product.DisplayId = countDisplayNo + 1;
                     observReturnInvoiceItemDtosListFiltered.Add(product);
-                    observCashInvoiceItemDtosList.Add(product);
+                    observReturnInvoiceItemDtosList.Add(product);
                     countDisplayNo++;
 
                 }
                 counId = observReturnInvoiceItemDtosListFiltered.Count() + 1;
 
                 dgInvoiceItems.ItemsSource = observReturnInvoiceItemDtosListFiltered;
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error in LoadProducts: {ex.Message}");
-            }
+ 
         }
 
         #endregion
@@ -174,7 +169,7 @@ namespace ErpSystemBeniSouef.Views.Pages.InvoiceAndsupplierRegion.InvoicePages.I
             };
             counId++;
             AddReturnSupplierInvoiceItemsDto d = new AddReturnSupplierInvoiceItemsDto();
-            ReturnSupplierInvoiceItemDto cashInvoiceItemDto = new ReturnSupplierInvoiceItemDto()
+            ReturnSupplierInvoiceItemDto ReturnInvoiceItemDto = new ReturnSupplierInvoiceItemDto()
             {
                 LineTotal = invoiceItemDetails.LineTotal,
                 Notes = Notes,
@@ -185,11 +180,11 @@ namespace ErpSystemBeniSouef.Views.Pages.InvoiceAndsupplierRegion.InvoicePages.I
                 Id = counId
             };
             d.invoiceItemDtos = new List<ReturnSupplierInvoiceItemDto>();
-            d.invoiceItemDtos.Add(cashInvoiceItemDto);
+            d.invoiceItemDtos.Add(ReturnInvoiceItemDto);
          //   _returnSupplierInvoiceService.AddInvoiceItems( d);
 
             observReturnInvoiceItemDtosListFiltered.Add(invoiceItemDetails);
-            observCashInvoiceItemDtosList.Add(invoiceItemDetails);
+            observReturnInvoiceItemDtosList.Add(invoiceItemDetails);
             dgInvoiceItems.ItemsSource = observReturnInvoiceItemDtosListFiltered;
 
             MessageBox.Show("تم اضافه عنصر للفاتوره الكاش بنجاح");
@@ -198,6 +193,7 @@ namespace ErpSystemBeniSouef.Views.Pages.InvoiceAndsupplierRegion.InvoicePages.I
 
         #endregion
 
+        #region Product Type_Selection Changed Region
         private void cbProductType_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (cbProductType.SelectedItem is CategoryDto s)
@@ -212,52 +208,51 @@ namespace ErpSystemBeniSouef.Views.Pages.InvoiceAndsupplierRegion.InvoicePages.I
 
             }
 
-        }
-
-
+        } 
+        #endregion
 
         #region Delete Button Region
 
         private void DeleteButton_Click_1(object sender, RoutedEventArgs e)
         {
-            //if (dgInvoiceItems.SelectedItems.Count == 0)
-            //{
-            //    MessageBox.Show("من فضلك اختر عنصر محدد للحذف");
-            //    return;
-            //}
-            //List<InvoiceItemDetailsDto> selectedInvoiceItemList = dgInvoiceItems.SelectedItems.Cast<InvoiceItemDetailsDto>().ToList();
+            if (dgInvoiceItems.SelectedItems.Count == 0)
+            {
+                MessageBox.Show("من فضلك اختر عنصر محدد للحذف");
+                return;
+            }
+            List<ReturnSupplierInvoiceItemDetailsDto> selectedInvoiceItemList = dgInvoiceItems.SelectedItems.Cast<ReturnSupplierInvoiceItemDetailsDto>().ToList();
 
-            //int deletedCount = 0;
-            //foreach (var selectedInvoiceItem in selectedInvoiceItemList)
-            //{
-            //    if (selectedInvoiceItem.Id != 0)
-            //    {
-            //        bool res = _cashInvoiceItemsService.SoftDelete(selectedInvoiceItem.Id, selectedInvoiceItem.LineTotal, invoiceIDFromInvoicePage);
-            //        if (!res)
-            //        {
-            //            MessageBox.Show("حدث خطأ أثناء التعديل");
-            //            return;
-            //        }
-            //        else
-            //        {
-            //            observCashInvoiceItemDtosFiltered.Remove(selectedInvoiceItem);
-            //            counId--;
-            //        }
-            //    }
-            //    else
-            //    {
-            //        observCashInvoiceItemDtosFiltered.Remove(selectedInvoiceItem);
-            //        counId--;
+            int deletedCount = 0;
+            foreach (var selectedInvoiceItem in selectedInvoiceItemList)
+            {
+                if (selectedInvoiceItem.Id != 0)
+                {
+                    bool res = _returnSupplierInvoiceService.SoftDelete(selectedInvoiceItem.Id, selectedInvoiceItem.LineTotal, invoiceIDFromInvoicePage);
+                    if (!res)
+                    {
+                        MessageBox.Show("حدث خطأ أثناء التعديل");
+                        return;
+                    }
+                    else
+                    {
+                        observReturnInvoiceItemDtosListFiltered.Remove(selectedInvoiceItem);
+                        counId--;
+                    }
+                }
+                else
+                {
+                    observReturnInvoiceItemDtosListFiltered.Remove(selectedInvoiceItem);
+                    counId--;
 
-            //    }
-            //    deletedCount++;
-            //}
-            //if (deletedCount == 0)
-            //{
-            //    MessageBox.Show($"  لم يتم حذف اي عنصر  ");
+                }
+                deletedCount++;
+            }
+            if (deletedCount == 0)
+            {
+                MessageBox.Show($"  لم يتم حذف اي عنصر  ");
 
-            //}
-            //MessageBox.Show($"  تم حذف  {deletedCount} عنصر   ");
+            }
+            MessageBox.Show($"  تم حذف  {deletedCount} عنصر   ");
         }
 
         #endregion
@@ -304,18 +299,18 @@ namespace ErpSystemBeniSouef.Views.Pages.InvoiceAndsupplierRegion.InvoicePages.I
             decimal InvoiceTotalPrice = 0;
             foreach (var NewAddedItem in NewAddedItems)
             {
-                ReturnSupplierInvoiceItemDto cashInvoiceItemsDto = _mapper.Map<ReturnSupplierInvoiceItemDto>(NewAddedItem);
+                ReturnSupplierInvoiceItemDto ReturnInvoiceItemsDto = _mapper.Map<ReturnSupplierInvoiceItemDto>(NewAddedItem);
 
                 InvoiceTotalPrice += NewAddedItem.LineTotal;
                 CategoryDto category = categories.Where(i => i.Id == NewAddedItem.ProductTypeId).FirstOrDefault();
 
-                addReturnInvoiceItemsDto.invoiceItemDtos.Add(cashInvoiceItemsDto);
+                addReturnInvoiceItemsDto.invoiceItemDtos.Add(ReturnInvoiceItemsDto);
             }
             addReturnInvoiceItemsDto.InvoiceTotalPrice = InvoiceTotalPrice;
             bool res = await _returnSupplierInvoiceService.AddInvoiceItems(addReturnInvoiceItemsDto);
             if (res)
             {
-                MessageBox.Show("تم تعديل الفاتوره الكاش بنجاح");
+                MessageBox.Show("تم تعديل الفاتوره بنجاح");
                 return;
             }
 
@@ -342,37 +337,33 @@ namespace ErpSystemBeniSouef.Views.Pages.InvoiceAndsupplierRegion.InvoicePages.I
 
         private void SearchByItemFullNameBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            //var query = SearchByItemTextBox.Text?.ToLower() ?? "";
+            var query = SearchByItemTextBox.Text?.ToLower() ?? "";
 
-            //// فلترة النتائج
-            //var filtered = observCashInvoiceItemDtosList
-            //    .Where(i => i.ProductName != null && i.ProductName.ToLower().Contains(query))
-            //    .ToList();
-            //// تحديث الـ DataGrid
-            //observCashInvoiceItemDtosFiltered.Clear();
-            //foreach (var item in filtered)
-            //{
-            //    observCashInvoiceItemDtosFiltered.Add(item);
-            //}
+            // فلترة النتائج
+            var filtered = observReturnInvoiceItemDtosList
+                .Where(i => i.ProductName != null && i.ProductName.ToLower().Contains(query))
+                .ToList();
+            // تحديث الـ DataGrid
+            observReturnInvoiceItemDtosListFiltered.Clear();
+            foreach (var item in filtered)
+            {
+                observReturnInvoiceItemDtosListFiltered.Add(item);
+            }
 
-            //// تحديث الاقتراحات
-            //var suggestions = filtered.Select(i => i.ProductName);
-            //if (suggestions.Any())
-            //{
-            //    dgInvoiceItems.ItemsSource = filtered;
-            //    //SuggestionsItemsListBox.ItemsSource = suggestions;
-            //    //SuggestionsPopup.IsOpen = true;
-            //}
-            //else
-            //{
-            //    //SuggestionsPopup.IsOpen = false;
-            //}
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                observReturnInvoiceItemDtosListFiltered.Clear();
+                foreach (var item in observReturnInvoiceItemDtosList)
+                {
+                    observReturnInvoiceItemDtosListFiltered.Add(item);
+                }
+                return;
+            }
+
 
         }
 
         #endregion
-
-
 
         #region BackBtn_Click Region
         private void BackBtn_Click(object sender, RoutedEventArgs e)

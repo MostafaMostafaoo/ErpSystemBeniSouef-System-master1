@@ -2,12 +2,14 @@
 using ErpSystemBeniSouef.Core;
 using ErpSystemBeniSouef.Core.Contract;
 using ErpSystemBeniSouef.Core.Contract.Invoice;
+using ErpSystemBeniSouef.Core.Contract.Invoice.IDamageInvoiceService;
 using ErpSystemBeniSouef.Core.Contract.Invoice.ReturnSupplir;
 using ErpSystemBeniSouef.Infrastructer;
 using ErpSystemBeniSouef.Infrastructer.Data;
 using ErpSystemBeniSouef.Infrastructer.Data.Context;
 using ErpSystemBeniSouef.Service.CollectorServices;
 using ErpSystemBeniSouef.Service.InvoiceServices;
+using ErpSystemBeniSouef.Service.InvoiceServices.DamageInvoiceService;
 using ErpSystemBeniSouef.Service.InvoiceServices.ReturnSupplierInvoiceService;
 using ErpSystemBeniSouef.Service.MainAreaServices;
 using ErpSystemBeniSouef.Service.ProductService;
@@ -63,7 +65,7 @@ namespace ErpSystemBeniSouef
         services.AddScoped(typeof(ICashInvoiceService), typeof(CashInvoiceService));
         services.AddScoped(typeof(IReturnSupplierInvoiceService), typeof(ReturnSupplierInvoiceService));
         services.AddScoped<IReturnSupplierInvoiceItemService, ReturnSupplierInvoiceItemService>();
-
+        services.AddScoped(typeof(IDamageInvoiceService), typeof(DamageInvoiceService));
 
         services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
